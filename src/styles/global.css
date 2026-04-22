@@ -1,0 +1,339 @@
+/* ============================================================
+   TRAXUS // GLOBAL
+   Brass Hands × Marathon — retro-industrial sci-fi
+   Rules:
+     - zero border-radius
+     - zero ease-in-out on state changes
+     - zero system/webfont fallbacks visible (Inter/Roboto/Arial)
+   ============================================================ */
+
+:root {
+  --bg:           #000000;
+  --bg-panel:     #05050A;
+  --text:         #F5F0E8;
+  --text-dim:     #555050;
+  --amber:        #FF6500;
+  --amber-hot:    #FF8C00;
+  --amber-border: rgba(255, 101, 0, 0.35);
+  --amber-glow:   rgba(255, 101, 0, 0.12);
+  --cyan:         #00D4FF;
+  --white-flash:  #FFFFFF;
+
+  --font-display: 'Barlow Condensed', 'Bebas Neue', sans-serif;
+  --font-mono:    'IBM Plex Mono', ui-monospace, monospace;
+
+  --scanline-opacity: 0.06;
+  --grain-opacity:    0.08;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  border-radius: 0 !important; /* absolute rule */
+}
+
+html {
+  height: 100%;
+  overflow: hidden;            /* paginated mode — no document scroll */
+}
+
+body {
+  height: 100vh;
+  width: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.4;
+  overflow: hidden;            /* page swap replaces scrolling */
+  cursor: crosshair;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* #root must NOT be a scroll container — leave overflow default (visible) */
+#root {
+  min-height: 100vh;
+  position: relative;
+}
+
+body {
+  position: relative;
+  /* Subtle amber vignette, drawn from center */
+  background:
+    radial-gradient(ellipse at center,
+      var(--bg) 0%,
+      var(--bg) 55%,
+      #050000 90%,
+      #000 100%);
+}
+
+/* --------------------------------------------------------------
+   Scanlines — fixed overlay, multiply blend
+   -------------------------------------------------------------- */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2000;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0px,
+    rgba(0, 0, 0, 0) 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 2px,
+    rgba(0, 0, 0, var(--scanline-opacity)) 3px
+  );
+  mix-blend-mode: multiply;
+}
+
+/* --------------------------------------------------------------
+   Vignette — fixed overlay
+   -------------------------------------------------------------- */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2001;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(0, 0, 0, 0) 40%,
+    rgba(0, 0, 0, 0.55) 85%,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+}
+
+/* --------------------------------------------------------------
+   Flash overlay (black / white / invert) — controlled via GSAP
+   -------------------------------------------------------------- */
+.flash-overlay {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  background: #000;
+  opacity: 0;
+  transition: none !important;
+}
+
+/* --------------------------------------------------------------
+   Type registers
+   -------------------------------------------------------------- */
+.type-display {
+  font-family: var(--font-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.01em;
+  line-height: 0.88;
+}
+
+.type-mono {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-weight: 400;
+}
+
+.type-mono-dim {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+/* --------------------------------------------------------------
+   Blink (for cursor-like status indicators) — step, no ease
+   -------------------------------------------------------------- */
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes blink-slow {
+  0%, 70% { opacity: 1; }
+  71%, 100% { opacity: 0.25; }
+}
+
+.blink { animation: blink 0.8s step-end infinite; }
+.blink-slow { animation: blink-slow 1.6s step-end infinite; }
+
+/* --------------------------------------------------------------
+   Marquee / ticker
+   -------------------------------------------------------------- */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* --------------------------------------------------------------
+   Chamfered button (CTA)
+   -------------------------------------------------------------- */
+.chamfer {
+  clip-path: polygon(
+    0 0,
+    calc(100% - 14px) 0,
+    100% 14px,
+    100% 100%,
+    14px 100%,
+    0 calc(100% - 14px)
+  );
+}
+
+/* --------------------------------------------------------------
+   Utility
+   -------------------------------------------------------------- */
+::selection {
+  background: var(--amber);
+  color: var(--bg);
+}
+
+/* Hide scrollbar cosmetically (still scrollable) */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--amber-border); }
+
+/* --------------------------------------------------------------
+   Transition sweep — CSS diagonal bar across whole page.
+   Fires via JS adding/removing this class on <body>.
+   -------------------------------------------------------------- */
+@keyframes sweep-anim {
+  from { transform: translateX(-110vw) skewX(-12deg); }
+  to   { transform: translateX(110vw)  skewX(-12deg); }
+}
+
+body.transition-sweep::after {
+  content: '';
+  position: fixed;
+  inset: -20% 0;
+  width: 60vw;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255,101,0,0.07) 30%,
+    rgba(255,101,0,0.14) 50%,
+    rgba(255,101,0,0.07) 70%,
+    transparent 100%
+  );
+  animation: sweep-anim 0.12s linear forwards;
+  pointer-events: none;
+  z-index: 8999;
+}
+
+/* --------------------------------------------------------------
+   Transition: diagonal wipe — thick amber bar crossing the viewport
+   -------------------------------------------------------------- */
+@keyframes diagonal-wipe-anim {
+  from { transform: translateX(-120vw) skewX(-22deg); }
+  to   { transform: translateX(120vw)  skewX(-22deg); }
+}
+body.transition-diagonal::before {
+  /* override default scanline with wipe bar — re-declared */
+  content: '';
+  position: fixed;
+  inset: -30% 0;
+  width: 45vw;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(255,101,0,0.35) 30%,
+    rgba(255,101,0,0.75) 50%,
+    rgba(255,101,0,0.35) 70%,
+    transparent 100%
+  );
+  animation: diagonal-wipe-anim 0.18s linear forwards;
+  pointer-events: none;
+  z-index: 9000;
+  mix-blend-mode: screen;
+}
+
+/* --------------------------------------------------------------
+   Transition: stripe cascade — thin horizontal amber stripes
+   -------------------------------------------------------------- */
+@keyframes stripe-cascade {
+  0%   { background-position: 0 -100vh; opacity: 0; }
+  10%  { opacity: 1; }
+  100% { background-position: 0 100vh;  opacity: 0; }
+}
+body.transition-stripes::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,101,0,0) 0px,
+    rgba(255,101,0,0) 18px,
+    rgba(255,101,0,0.55) 18px,
+    rgba(255,101,0,0.55) 20px
+  );
+  animation: stripe-cascade 0.22s linear forwards;
+  pointer-events: none;
+  z-index: 9000;
+  mix-blend-mode: screen;
+}
+
+/* --------------------------------------------------------------
+   Section-exit glitch — briefly applied to a section's content
+   -------------------------------------------------------------- */
+@keyframes glitch-shift {
+  0%   { transform: translate(0, 0); filter: none; }
+  20%  { transform: translate(-6px, 2px); filter: hue-rotate(20deg); }
+  40%  { transform: translate(7px, -3px); }
+  60%  { transform: translate(-3px, 4px); }
+  80%  { transform: translate(5px, 0); }
+  100% { transform: translate(0, 0); filter: none; }
+}
+.glitch-exit {
+  animation: glitch-shift 0.18s steps(5, end) forwards;
+}
+
+/* --------------------------------------------------------------
+   [data-entry] elements start hidden; JS snaps them in.
+   CSS fallback: always visible without JS.
+   -------------------------------------------------------------- */
+[data-entry] {
+  /* opacity is overridden by GSAP at runtime */
+}
+
+/* Paginated mode — no scroll-snap. Each section is fixed/absolute.
+   Visibility toggled by PageStack; transitions are hard cuts, not scrolls. */
+[data-section] {
+  position: absolute;
+  inset: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+.page-stack {
+  position: fixed;
+  top: 24px;    /* below StatusBar */
+  bottom: 22px; /* above Ticker */
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+.page-stack [data-section-wrapper] {
+  position: absolute;
+  inset: 0;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateZ(0);
+}
+.page-stack [data-section-wrapper][data-active="true"] {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Sections with internal scroll (terminal buffer, log) — opt in */
+[data-scroll-lock] {
+  overflow: auto;
+  overscroll-behavior: contain;
+}
