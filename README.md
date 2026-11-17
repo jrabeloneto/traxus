@@ -2,6 +2,8 @@
 
 Site experiencial com estética de terminal militar/industrial: uma sequência de boot, seções que trocam como páginas de um dossiê e uma cena 3D em tempo real com pós-processamento de glitch, scanline e aberração cromática.
 
+[![Live](https://img.shields.io/badge/Live-traxus--steel.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://traxus-steel.vercel.app)
+
 ![React](https://img.shields.io/badge/React-19-20232a?style=flat-square&logo=react&logoColor=61dafb)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white)
 ![Three.js](https://img.shields.io/badge/Three.js-R3F-000000?style=flat-square&logo=threedotjs&logoColor=white)
